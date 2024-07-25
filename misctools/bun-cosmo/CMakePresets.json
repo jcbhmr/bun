@@ -1,0 +1,44 @@
+{
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 29,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "binaryDir": "build",
+      "toolchainFile": "cmake/unknown-unknown-cosmo@cosmocc.cmake"
+    },
+    {
+      "name": "release",
+      "inherits": ["default"],
+      "binaryDir": "build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": false
+      }
+    }
+  ],
+  "buildPresets": [
+      { "name": "default", "configurePreset": "default" },
+      { "name": "release", "configurePreset": "release" }
+  ],
+  "workflowPresets": [
+      {
+          "name": "default",
+          "steps": [
+              { "type": "configure", "name": "default" },
+              { "type": "build", "name": "default" }
+          ]
+      },
+      {
+          "name": "release",
+          "steps": [
+              { "type": "configure", "name": "release" },
+              { "type": "build", "name": "release" }
+          ]
+      }
+  ]
+}

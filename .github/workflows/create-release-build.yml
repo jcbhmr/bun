@@ -198,8 +198,8 @@ jobs:
       - name: "Build bun-cosmo"
         working-directory: bun/misctools/bun-cosmo
         run: |
-          cmake --preset default -DBUN_RELEASES="$GITHUB_WORKSPACE/bun-releases"
-          cmake --build --preset default
+          cmake --preset release -DBUN_RELEASES="$GITHUB_WORKSPACE/bun-releases"
+          cmake --build --preset release
           cd build
           mkdir ./bun-cosmo
           mv ./bun ./bun-cosmo/bun
