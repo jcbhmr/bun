@@ -163,21 +163,47 @@ jobs:
           else
             echo "Artifacts downloaded successfully."
           fi
-      - name: Send Message
+      - if: ${{ github.repository_owner == 'oven-sh' }}
+        name: Send Message
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           nodetail: true
           color: "#FF0000"
           title: "Bun v${{ inputs.version }} release artifacts uploaded"
-      - name: "Upload Artifacts"
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: "Unzip one level deep each artifact"
         run: |
-          # Unzip one level deep each artifact
           cd bun-releases
           for f in *.zip; do
             unzip -o $f
           done
-          cd ..
+      - name: "Checkout to ./bun"
+        uses: actions/checkout@v4
+        with:
+          path: bun
+      - name: "Setup CMake"
+        uses: jwlawson/actions-setup-cmake@v2
+      - name: "Setup cosmocc"
+        run: |
+          cd ~
+          mkdir -p cosmocc
+          cd cosmocc
+          wget https://cosmo.zip/pub/cosmocc/cosmocc.zip
+          unzip cosmocc.zip
+          echo "$HOME/cosmocc/bin" >> "$GITHUB_PATH"
+          sudo wget -O /usr/bin/ape https://cosmo.zip/pub/cosmos/bin/ape-$(uname -m).elf
+          sudo chmod +x /usr/bin/ape
+          sudo sh -c "echo ':APE:M::MZqFpD::/usr/bin/ape:' >/proc/sys/fs/binfmt_misc/register"
+          sudo sh -c "echo ':APE-jart:M::jartsr::/usr/bin/ape:' >/proc/sys/fs/binfmt_misc/register"
+      - name: "Build bun-cosmo"
+        working-directory: bun/misctools/bun-cosmo
+        run: |
+          cmake --preset default -DBUN_RELEASES="$GITHUB_WORKSPACE/bun-releases"
+          cmake --build --preset default
+          cd build
+          zip "$GITHUB_WORKSPACE/bun-releases/bun.zip" ./bun
+      - name: "Upload Artifacts"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           gh release upload --repo=${{ github.repository }} ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.release.id }} ${{ inputs.clobber && '--clobber' || '' }} bun-releases/*.zip
