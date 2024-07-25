@@ -200,7 +200,7 @@ jobs:
         run: |
           cmake --preset release -DBUN_RELEASES="$GITHUB_WORKSPACE/bun-releases"
           cmake --build --preset release
-          cd build
+          cd build/release
           mkdir ./bun-cosmo
           mv ./bun ./bun-cosmo/bun
           ln -s ./bun-cosmo/bun ./bun-cosmo/bun.exe
