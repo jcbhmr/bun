@@ -201,7 +201,10 @@ jobs:
           cmake --preset default -DBUN_RELEASES="$GITHUB_WORKSPACE/bun-releases"
           cmake --build --preset default
           cd build
-          zip -y "$GITHUB_WORKSPACE/bun-releases/bun.zip" ./bun ./bun.exe
+          mkdir ./bun-cosmo
+          mv ./bun ./bun-cosmo/bun
+          ln -s ./bun-cosmo/bun ./bun-cosmo/bun.exe
+          zip -yr "$GITHUB_WORKSPACE/bun-releases/bun-cosmo.zip" ./bun-cosmo
       - name: "Upload Artifacts"
         env:
           GH_TOKEN: ${{ github.token }}
